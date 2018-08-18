@@ -13,11 +13,11 @@ exports.updateOppositionCollecions = (event, context) => {
         .file(filename)
         .save(JSON.stringify(data), err => {
           if (err) reject(err)
-          resolve(`Upload "${filename}" succesfully`)
+          resolve(`Upload "${filename}" succesfully!`)
         })
     })
     return streamAsPromise.then(() => {
-      console.log(`Json ${filename} parsed successfully`)
+      console.log(`Json "${filename}" parsed successfully!`)
       return null
     })
   }
@@ -40,7 +40,7 @@ exports.updateOppositionCollecions = (event, context) => {
   const streamAsPromise = new Promise((resolve, reject) =>
     readStream
       .on('end', async () => {
-        const result = await new Parser(Buffer.concat(bodyparts))
+        const result = await new Parser(gcsEvent.name, Buffer.concat(bodyparts))
         await upload2Bucket(gcsEvent.name.split('.')[0], result)
         resolve(true)
       })
