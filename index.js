@@ -40,15 +40,26 @@ exports.updateOppositionCollecions = (event, context) => {
   const streamAsPromise = new Promise((resolve, reject) =>
     readStream
       .on('end', async () => {
-        const result = await new Parser(gcsEvent.name, Buffer.concat(bodyparts))
-        await upload2Bucket(gcsEvent.name.split('.')[0], result)
-        resolve(true)
+        try {
+          const parserFn = new Parser(
+            gcsEvent.name.split('.')[0],
+            Buffer.concat(bodyparts)
+          )
+          const result = await parserFn.readPdfFile()
+          await upload2Bucket(gcsEvent.name.split('.')[0], result)
+          resolve(true)
+        } catch (err) {
+          console.log(err)
+          reject(err)
+        } finally {
+          console.log(`Parsed the "${gcsEvent.name.toUpperCase()}"!`)
+        }
       })
       .on('error', reject)
   )
 
   return streamAsPromise.then(() => {
-    console.log(`Filed ${gcsEvent.name} parsed successfully`)
+    console.log(`Filed ${gcsEvent.name} parsed successfully!!!`)
     return null
   })
 }
